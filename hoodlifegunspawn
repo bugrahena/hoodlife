@@ -1,0 +1,1650 @@
+-- LocalScript - StarterPlayerScripts icine koy
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- CONFIG
+local ADMIN_ID = 5774382729
+local isAdmin = (player.UserId == 5774382729)
+local isUnlocked = isAdmin
+local discordLink = "discord.gg/Wrh93AdDrM"
+local keyDatabase = {
+	-- 5 GUNLUK KEYLER
+	["LS-5GUN-AAAA"] = {active=true, expireTime=os.time()+(86400*5),  uses=1, usedCount=0, targetPlayer=nil},
+	["LS-5GUN-BBBB"] = {active=true, expireTime=os.time()+(86400*5),  uses=1, usedCount=0, targetPlayer=nil},
+	["LS-5GUN-CCCC"] = {active=true, expireTime=os.time()+(86400*5),  uses=1, usedCount=0, targetPlayer=nil},
+	["LS-5GUN-DDDD"] = {active=true, expireTime=os.time()+(86400*5),  uses=1, usedCount=0, targetPlayer=nil},
+	["LS-5GUN-EEEE"] = {active=true, expireTime=os.time()+(86400*5),  uses=1, usedCount=0, targetPlayer=nil},
+
+	-- 10 GUNLUK KEYLER
+	["LS-10GN-AAAA"] = {active=true, expireTime=os.time()+(86400*10), uses=1, usedCount=0, targetPlayer=nil},
+	["LS-10GN-BBBB"] = {active=true, expireTime=os.time()+(86400*10), uses=1, usedCount=0, targetPlayer=nil},
+	["LS-10GN-CCCC"] = {active=true, expireTime=os.time()+(86400*10), uses=1, usedCount=0, targetPlayer=nil},
+	["LS-10GN-DDDD"] = {active=true, expireTime=os.time()+(86400*10), uses=1, usedCount=0, targetPlayer=nil},
+	["LS-10GN-EEEE"] = {active=true, expireTime=os.time()+(86400*10), uses=1, usedCount=0, targetPlayer=nil},
+
+	-- 1 AYLIK KEYLER
+	["LS-1AYK-AAAA"] = {active=true, expireTime=os.time()+(86400*30), uses=1, usedCount=0, targetPlayer=nil},
+	["LS-1AYK-BBBB"] = {active=true, expireTime=os.time()+(86400*30), uses=1, usedCount=0, targetPlayer=nil},
+	["LS-1AYK-CCCC"] = {active=true, expireTime=os.time()+(86400*30), uses=1, usedCount=0, targetPlayer=nil},
+	["LS-1AYK-DDDD"] = {active=true, expireTime=os.time()+(86400*30), uses=1, usedCount=0, targetPlayer=nil},
+	["LS-1AYK-EEEE"] = {active=true, expireTime=os.time()+(86400*30), uses=1, usedCount=0, targetPlayer=nil},
+
+	-- LIFETIME KEYLER (sure yok, 1 kisi kullanir)
+	["LS-LIFE-AAAA"] = {active=true, expireTime=nil,                  uses=1, usedCount=0, targetPlayer=nil},
+	["LS-LIFE-BBBB"] = {active=true, expireTime=nil,                  uses=1, usedCount=0, targetPlayer=nil},
+	["LS-LIFE-CCCC"] = {active=true, expireTime=nil,                  uses=1, usedCount=0, targetPlayer=nil},
+	["LS-LIFE-DDDD"] = {active=true, expireTime=nil,                  uses=1, usedCount=0, targetPlayer=nil},
+	["LS-LIFE-EEEE"] = {active=true, expireTime=nil,                  uses=1, usedCount=0, targetPlayer=nil},
+}
+local uiOpen = false
+local isDragging = false
+local dragStart = nil
+local startPos = nil
+local infAmmoCnt = 30
+
+-- ============================================================
+-- DIL SİSTEMİ
+-- ============================================================
+local langs = {
+	TR = {
+		title = "LEASTRA SHOP",
+		subtitle = "Ozel Yapim",
+		keyTitle = "Erisim icin key giriniz",
+		keyPlaceholder = "Key giriniz...",
+		keyBtn = "Giris Yap",
+		keyGet = "Key Al - Discord: ",
+		keyEmpty = "Key bos olamaz",
+		keyInvalid = "Gecersiz key",
+		keyDeactive = "Key deaktif",
+		keyNotYours = "Bu key size ozel degil",
+		keyExpired = "Key suresi doldu",
+		keyUsed = "Kullanim hakki doldu",
+		keySuccess = "Erisim verildi",
+		keyRequired = "Key Gerekli",
+		tabWeapon = "Silahlar",
+		tabPolWeap = "Pol.Silah",
+		tabCivCar = "Siv.Arac",
+		tabPolCar = "Pol.Arac",
+		tabCombat = "Savas",
+		tabLoot = "Loot",
+		tabMoney = "Para",
+		secWeapon = "Silahlar",
+		secPolWeap = "Polis Silahlari",
+		secCivCar = "Sivil Araclar",
+		secPolCar = "Polis Araclari",
+		secCombat = "Savas Ozellikleri",
+		secLoot = "Loot - Klasor Bazli",
+		secMoney = "Para",
+		getBtn = "Al",
+		given = "Verildi",
+		notFound = "Bulunamadi",
+		infAmmo = "Sinirsiz Mermi (Inf Ammo)",
+		noRecoil = "Tepkisizlik (No Recoil)",
+		ammoCount = "Mermi Sayisi",
+		open = "Ac",
+		close = "Kapat",
+		on = "ACIK",
+		off = "KAPALI",
+		lootInfo = "Her tiklama bir sonraki klasorden loot verir.",
+		lootBtn = "Loot Cek",
+		lootReady = "Hazir",
+		lootNoStorage = "Storage yok",
+		lootNoToos = "ToosLoot yok",
+		lootNoFolder = "Klasor yok",
+		lootKeyReq = "Key gerekli",
+		lootAllDone = "Tumu Bitti - Tekrar",
+		lootNext = "Sonraki: ",
+		moneyAmount = "Miktar:",
+		moneyPlaceholder = "Miktar gir...",
+		moneyBtn = "Para Ver",
+		moneyReady = "Hazir",
+		moneyKeyReq = "Key gerekli",
+		moneyInvalid = "Gecersiz miktar",
+		moneyTrying = "Deneniyor...",
+		moneyGiven = " para verildi | ",
+		moneyError = "Hata: ",
+		moneyNoRemote = "Remote bulunamadi",
+		footer = "Leastra Shop - Ozel Yapim",
+		langBtn = "Dil",
+		adminTitle = "LEASTRA - ADMIN PANEL",
+		adminSecKey = "Key Yonetimi - Olustur",
+		adminSecList = "Mevcut Keyler",
+		adminSecCustom = "Oyuncuya Ozel Key",
+		adminSecExtend = "Sure Uzat / Ayarla",
+		adminSecDisc = "Discord Adres Degistir",
+		adminSecPlayers = "Sunucudaki Oyuncular",
+		adminKeyLabel = "Key:",
+		adminRandom = "Rastgele",
+		adminDuration = "Sure:",
+		adminUsage = "Kullanim:",
+		adminTarget = "Oyuncu (opsiyonel):",
+		adminCreate = "Key Olustur",
+		adminCreated = "Olusturuldu: ",
+		adminKeyEmpty = "Key bos",
+		adminKeyExists = "Zaten var",
+		adminUnlimited = "sinir.",
+		adminActive = "AKTIF",
+		adminDeactive = "DEAKTIF",
+		adminDeactBtn = "Deaktif",
+		adminActBtn = "Aktif",
+		adminDelete = "Sil",
+		adminPlayerName = "Ad:",
+		adminPlayerID = "ID:",
+		adminCustomCreate = "Ozel Key Olustur",
+		adminNeedTarget = "Ad veya ID gerekli",
+		adminExtendKey = "Key gir",
+		adminSeconds = "Saniye:",
+		adminExtend = "Uzat",
+		adminSet = "Ayarla",
+		adminExtended = "Uzatildi",
+		adminSetDone = "Ayarlandi",
+		adminNoKey = "Key yok",
+		adminInvalid = "Gecersiz",
+		adminDiscSave = "Kaydet",
+		adminRefresh = "Yenile",
+	},
+	EN = {
+		title = "LEASTRA SHOP",
+		subtitle = "Custom Made",
+		keyTitle = "Enter key to access",
+		keyPlaceholder = "Enter key...",
+		keyBtn = "Login",
+		keyGet = "Get Key - Discord: ",
+		keyEmpty = "Key cannot be empty",
+		keyInvalid = "Invalid key",
+		keyDeactive = "Key is deactivated",
+		keyNotYours = "This key is not for you",
+		keyExpired = "Key has expired",
+		keyUsed = "Usage limit reached",
+		keySuccess = "Access granted",
+		keyRequired = "Key Required",
+		tabWeapon = "Weapons",
+		tabPolWeap = "Pol.Weapon",
+		tabCivCar = "Civ.Car",
+		tabPolCar = "Pol.Car",
+		tabCombat = "Combat",
+		tabLoot = "Loot",
+		tabMoney = "Money",
+		secWeapon = "Weapons",
+		secPolWeap = "Police Weapons",
+		secCivCar = "Civilian Cars",
+		secPolCar = "Police Cars",
+		secCombat = "Combat Features",
+		secLoot = "Loot - Folder Based",
+		secMoney = "Money",
+		getBtn = "Get",
+		given = "Given",
+		notFound = "Not Found",
+		infAmmo = "Infinite Ammo",
+		noRecoil = "No Recoil",
+		ammoCount = "Ammo Count",
+		open = "Enable",
+		close = "Disable",
+		on = "ON",
+		off = "OFF",
+		lootInfo = "Each click gives loot from next folder.",
+		lootBtn = "Get Loot",
+		lootReady = "Ready",
+		lootNoStorage = "No storage",
+		lootNoToos = "No ToosLoot",
+		lootNoFolder = "No folder",
+		lootKeyReq = "Key required",
+		lootAllDone = "All Done - Restart",
+		lootNext = "Next: ",
+		moneyAmount = "Amount:",
+		moneyPlaceholder = "Enter amount...",
+		moneyBtn = "Give Money",
+		moneyReady = "Ready",
+		moneyKeyReq = "Key required",
+		moneyInvalid = "Invalid amount",
+		moneyTrying = "Trying...",
+		moneyGiven = " money given | ",
+		moneyError = "Error: ",
+		moneyNoRemote = "Remote not found",
+		footer = "Leastra Shop - Custom Made",
+		langBtn = "Lang",
+		adminTitle = "LEASTRA - ADMIN PANEL",
+		adminSecKey = "Key Management - Create",
+		adminSecList = "Existing Keys",
+		adminSecCustom = "Player Specific Key",
+		adminSecExtend = "Extend / Set Duration",
+		adminSecDisc = "Change Discord Link",
+		adminSecPlayers = "Players in Server",
+		adminKeyLabel = "Key:",
+		adminRandom = "Random",
+		adminDuration = "Duration:",
+		adminUsage = "Usage:",
+		adminTarget = "Player (optional):",
+		adminCreate = "Create Key",
+		adminCreated = "Created: ",
+		adminKeyEmpty = "Key empty",
+		adminKeyExists = "Already exists",
+		adminUnlimited = "unlimited",
+		adminActive = "ACTIVE",
+		adminDeactive = "DEACTIVE",
+		adminDeactBtn = "Deactivate",
+		adminActBtn = "Activate",
+		adminDelete = "Delete",
+		adminPlayerName = "Name:",
+		adminPlayerID = "ID:",
+		adminCustomCreate = "Create Custom Key",
+		adminNeedTarget = "Name or ID required",
+		adminExtendKey = "Enter key",
+		adminSeconds = "Seconds:",
+		adminExtend = "Extend",
+		adminSet = "Set",
+		adminExtended = "Extended",
+		adminSetDone = "Set done",
+		adminNoKey = "No key",
+		adminInvalid = "Invalid",
+		adminDiscSave = "Save",
+		adminRefresh = "Refresh",
+	},
+	DE = {
+		title = "LEASTRA SHOP",
+		subtitle = "Benutzerdefiniert",
+		keyTitle = "Schlüssel eingeben",
+		keyPlaceholder = "Schlüssel eingeben...",
+		keyBtn = "Einloggen",
+		keyGet = "Schlüssel holen - Discord: ",
+		keyEmpty = "Schlüssel darf nicht leer sein",
+		keyInvalid = "Ungültiger Schlüssel",
+		keyDeactive = "Schlüssel deaktiviert",
+		keyNotYours = "Dieser Schlüssel gehört nicht Ihnen",
+		keyExpired = "Schlüssel abgelaufen",
+		keyUsed = "Nutzungslimit erreicht",
+		keySuccess = "Zugang gewährt",
+		keyRequired = "Schlüssel erforderlich",
+		tabWeapon = "Waffen",
+		tabPolWeap = "Pol.Waffe",
+		tabCivCar = "Ziv.Auto",
+		tabPolCar = "Pol.Auto",
+		tabCombat = "Kampf",
+		tabLoot = "Beute",
+		tabMoney = "Geld",
+		secWeapon = "Waffen",
+		secPolWeap = "Polizeiwaffen",
+		secCivCar = "Zivilautos",
+		secPolCar = "Polizeiautos",
+		secCombat = "Kampffunktionen",
+		secLoot = "Beute - Ordnerbasiert",
+		secMoney = "Geld",
+		getBtn = "Holen",
+		given = "Gegeben",
+		notFound = "Nicht gefunden",
+		infAmmo = "Unendlich Munition",
+		noRecoil = "Kein Rückstoß",
+		ammoCount = "Munitionsanzahl",
+		open = "Aktivieren",
+		close = "Deaktivieren",
+		on = "AN",
+		off = "AUS",
+		lootInfo = "Jeder Klick gibt Beute aus dem nächsten Ordner.",
+		lootBtn = "Beute holen",
+		lootReady = "Bereit",
+		lootNoStorage = "Kein Speicher",
+		lootNoToos = "Kein ToosLoot",
+		lootNoFolder = "Kein Ordner",
+		lootKeyReq = "Schlüssel erforderlich",
+		lootAllDone = "Alles fertig - Neustart",
+		lootNext = "Nächste: ",
+		moneyAmount = "Betrag:",
+		moneyPlaceholder = "Betrag eingeben...",
+		moneyBtn = "Geld geben",
+		moneyReady = "Bereit",
+		moneyKeyReq = "Schlüssel erforderlich",
+		moneyInvalid = "Ungültiger Betrag",
+		moneyTrying = "Versuche...",
+		moneyGiven = " Geld gegeben | ",
+		moneyError = "Fehler: ",
+		moneyNoRemote = "Remote nicht gefunden",
+		footer = "Leastra Shop - Benutzerdefiniert",
+		langBtn = "Sprache",
+		adminTitle = "LEASTRA - ADMIN PANEL",
+		adminSecKey = "Schlüsselverwaltung",
+		adminSecList = "Vorhandene Schlüssel",
+		adminSecCustom = "Spielerspezifischer Schlüssel",
+		adminSecExtend = "Verlängern / Festlegen",
+		adminSecDisc = "Discord-Link ändern",
+		adminSecPlayers = "Spieler im Server",
+		adminKeyLabel = "Schlüssel:",
+		adminRandom = "Zufällig",
+		adminDuration = "Dauer:",
+		adminUsage = "Nutzung:",
+		adminTarget = "Spieler (optional):",
+		adminCreate = "Schlüssel erstellen",
+		adminCreated = "Erstellt: ",
+		adminKeyEmpty = "Schlüssel leer",
+		adminKeyExists = "Bereits vorhanden",
+		adminUnlimited = "unbegrenzt",
+		adminActive = "AKTIV",
+		adminDeactive = "DEAKTIV",
+		adminDeactBtn = "Deaktivieren",
+		adminActBtn = "Aktivieren",
+		adminDelete = "Löschen",
+		adminPlayerName = "Name:",
+		adminPlayerID = "ID:",
+		adminCustomCreate = "Benutzerdef. Schlüssel",
+		adminNeedTarget = "Name oder ID erforderlich",
+		adminExtendKey = "Schlüssel eingeben",
+		adminSeconds = "Sekunden:",
+		adminExtend = "Verlängern",
+		adminSet = "Festlegen",
+		adminExtended = "Verlängert",
+		adminSetDone = "Festgelegt",
+		adminNoKey = "Kein Schlüssel",
+		adminInvalid = "Ungültig",
+		adminDiscSave = "Speichern",
+		adminRefresh = "Aktualisieren",
+	},
+	FR = {
+		title = "LEASTRA SHOP",
+		subtitle = "Fait sur mesure",
+		keyTitle = "Entrez la clé pour accéder",
+		keyPlaceholder = "Entrez la clé...",
+		keyBtn = "Connexion",
+		keyGet = "Obtenir clé - Discord: ",
+		keyEmpty = "La clé ne peut pas être vide",
+		keyInvalid = "Clé invalide",
+		keyDeactive = "Clé désactivée",
+		keyNotYours = "Cette clé ne vous appartient pas",
+		keyExpired = "Clé expirée",
+		keyUsed = "Limite d'utilisation atteinte",
+		keySuccess = "Accès accordé",
+		keyRequired = "Clé requise",
+		tabWeapon = "Armes",
+		tabPolWeap = "Pol.Arme",
+		tabCivCar = "Voi.Civ",
+		tabPolCar = "Voi.Pol",
+		tabCombat = "Combat",
+		tabLoot = "Butin",
+		tabMoney = "Argent",
+		secWeapon = "Armes",
+		secPolWeap = "Armes de police",
+		secCivCar = "Voitures civiles",
+		secPolCar = "Voitures de police",
+		secCombat = "Fonctions de combat",
+		secLoot = "Butin - Par dossier",
+		secMoney = "Argent",
+		getBtn = "Obtenir",
+		given = "Donné",
+		notFound = "Introuvable",
+		infAmmo = "Munitions infinies",
+		noRecoil = "Sans recul",
+		ammoCount = "Nombre de munitions",
+		open = "Activer",
+		close = "Désactiver",
+		on = "ACTIF",
+		off = "INACTIF",
+		lootInfo = "Chaque clic donne du butin du dossier suivant.",
+		lootBtn = "Obtenir butin",
+		lootReady = "Prêt",
+		lootNoStorage = "Pas de stockage",
+		lootNoToos = "Pas de ToosLoot",
+		lootNoFolder = "Pas de dossier",
+		lootKeyReq = "Clé requise",
+		lootAllDone = "Tout terminé - Recommencer",
+		lootNext = "Suivant: ",
+		moneyAmount = "Montant:",
+		moneyPlaceholder = "Entrez le montant...",
+		moneyBtn = "Donner argent",
+		moneyReady = "Prêt",
+		moneyKeyReq = "Clé requise",
+		moneyInvalid = "Montant invalide",
+		moneyTrying = "Essai...",
+		moneyGiven = " argent donné | ",
+		moneyError = "Erreur: ",
+		moneyNoRemote = "Remote introuvable",
+		footer = "Leastra Shop - Fait sur mesure",
+		langBtn = "Langue",
+		adminTitle = "LEASTRA - PANEL ADMIN",
+		adminSecKey = "Gestion des clés",
+		adminSecList = "Clés existantes",
+		adminSecCustom = "Clé spécifique au joueur",
+		adminSecExtend = "Prolonger / Définir",
+		adminSecDisc = "Changer lien Discord",
+		adminSecPlayers = "Joueurs dans le serveur",
+		adminKeyLabel = "Clé:",
+		adminRandom = "Aléatoire",
+		adminDuration = "Durée:",
+		adminUsage = "Utilisation:",
+		adminTarget = "Joueur (optionnel):",
+		adminCreate = "Créer clé",
+		adminCreated = "Créé: ",
+		adminKeyEmpty = "Clé vide",
+		adminKeyExists = "Déjà existant",
+		adminUnlimited = "illimité",
+		adminActive = "ACTIF",
+		adminDeactive = "INACTIF",
+		adminDeactBtn = "Désactiver",
+		adminActBtn = "Activer",
+		adminDelete = "Supprimer",
+		adminPlayerName = "Nom:",
+		adminPlayerID = "ID:",
+		adminCustomCreate = "Créer clé personnalisée",
+		adminNeedTarget = "Nom ou ID requis",
+		adminExtendKey = "Entrer clé",
+		adminSeconds = "Secondes:",
+		adminExtend = "Prolonger",
+		adminSet = "Définir",
+		adminExtended = "Prolongé",
+		adminSetDone = "Défini",
+		adminNoKey = "Pas de clé",
+		adminInvalid = "Invalide",
+		adminDiscSave = "Sauvegarder",
+		adminRefresh = "Actualiser",
+	},
+	ES = {
+		title = "LEASTRA SHOP",
+		subtitle = "Hecho a medida",
+		keyTitle = "Ingresa la clave para acceder",
+		keyPlaceholder = "Ingresa la clave...",
+		keyBtn = "Iniciar sesión",
+		keyGet = "Obtener clave - Discord: ",
+		keyEmpty = "La clave no puede estar vacía",
+		keyInvalid = "Clave inválida",
+		keyDeactive = "Clave desactivada",
+		keyNotYours = "Esta clave no es tuya",
+		keyExpired = "Clave expirada",
+		keyUsed = "Límite de uso alcanzado",
+		keySuccess = "Acceso concedido",
+		keyRequired = "Clave requerida",
+		tabWeapon = "Armas",
+		tabPolWeap = "Pol.Arma",
+		tabCivCar = "Auto.Civ",
+		tabPolCar = "Auto.Pol",
+		tabCombat = "Combate",
+		tabLoot = "Botín",
+		tabMoney = "Dinero",
+		secWeapon = "Armas",
+		secPolWeap = "Armas policiales",
+		secCivCar = "Autos civiles",
+		secPolCar = "Autos policiales",
+		secCombat = "Funciones de combate",
+		secLoot = "Botín - Por carpeta",
+		secMoney = "Dinero",
+		getBtn = "Obtener",
+		given = "Dado",
+		notFound = "No encontrado",
+		infAmmo = "Munición infinita",
+		noRecoil = "Sin retroceso",
+		ammoCount = "Cantidad de munición",
+		open = "Activar",
+		close = "Desactivar",
+		on = "ACTIVO",
+		off = "INACTIVO",
+		lootInfo = "Cada clic da botín de la siguiente carpeta.",
+		lootBtn = "Obtener botín",
+		lootReady = "Listo",
+		lootNoStorage = "Sin almacenamiento",
+		lootNoToos = "Sin ToosLoot",
+		lootNoFolder = "Sin carpeta",
+		lootKeyReq = "Clave requerida",
+		lootAllDone = "Todo listo - Reiniciar",
+		lootNext = "Siguiente: ",
+		moneyAmount = "Cantidad:",
+		moneyPlaceholder = "Ingresa cantidad...",
+		moneyBtn = "Dar dinero",
+		moneyReady = "Listo",
+		moneyKeyReq = "Clave requerida",
+		moneyInvalid = "Cantidad inválida",
+		moneyTrying = "Intentando...",
+		moneyGiven = " dinero dado | ",
+		moneyError = "Error: ",
+		moneyNoRemote = "Remote no encontrado",
+		footer = "Leastra Shop - Hecho a medida",
+		langBtn = "Idioma",
+		adminTitle = "LEASTRA - PANEL ADMIN",
+		adminSecKey = "Gestión de claves",
+		adminSecList = "Claves existentes",
+		adminSecCustom = "Clave específica del jugador",
+		adminSecExtend = "Extender / Establecer",
+		adminSecDisc = "Cambiar enlace Discord",
+		adminSecPlayers = "Jugadores en el servidor",
+		adminKeyLabel = "Clave:",
+		adminRandom = "Aleatorio",
+		adminDuration = "Duración:",
+		adminUsage = "Uso:",
+		adminTarget = "Jugador (opcional):",
+		adminCreate = "Crear clave",
+		adminCreated = "Creado: ",
+		adminKeyEmpty = "Clave vacía",
+		adminKeyExists = "Ya existe",
+		adminUnlimited = "ilimitado",
+		adminActive = "ACTIVO",
+		adminDeactive = "INACTIVO",
+		adminDeactBtn = "Desactivar",
+		adminActBtn = "Activar",
+		adminDelete = "Eliminar",
+		adminPlayerName = "Nombre:",
+		adminPlayerID = "ID:",
+		adminCustomCreate = "Crear clave personalizada",
+		adminNeedTarget = "Nombre o ID requerido",
+		adminExtendKey = "Ingresar clave",
+		adminSeconds = "Segundos:",
+		adminExtend = "Extender",
+		adminSet = "Establecer",
+		adminExtended = "Extendido",
+		adminSetDone = "Establecido",
+		adminNoKey = "Sin clave",
+		adminInvalid = "Inválido",
+		adminDiscSave = "Guardar",
+		adminRefresh = "Actualizar",
+	},
+}
+
+local currentLang = "TR"
+local L = langs[currentLang]
+local langCallbacks = {}
+
+local function onLangChange(cb)
+	table.insert(langCallbacks, cb)
+end
+
+local function setLang(code)
+	currentLang = code
+	L = langs[code]
+	for _, cb in pairs(langCallbacks) do
+		pcall(cb)
+	end
+end
+
+print("[Leastra] Basliyor... Admin:", isAdmin, "ID:", player.UserId)
+
+-- ScreenGui
+local SG = Instance.new("ScreenGui")
+SG.Name = "LeastraShop"
+SG.ResetOnSpawn = false
+SG.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+SG.IgnoreGuiInset = true
+SG.Parent = playerGui
+
+-- ============================================================
+-- YARDIMCI
+-- ============================================================
+local function mkFrame(parent, size, pos, color, zi, rad)
+	local f = Instance.new("Frame")
+	f.Size = size or UDim2.new(0,100,0,100)
+	f.Position = pos or UDim2.new(0,0,0,0)
+	f.BackgroundColor3 = color or Color3.fromRGB(15,15,18)
+	f.BorderSizePixel = 0
+	f.ZIndex = zi or 1
+	if rad then Instance.new("UICorner",f).CornerRadius = UDim.new(0,rad) end
+	f.Parent = parent
+	return f
+end
+
+local function mkLabel(parent, text, size, pos, tsz, col, font, zi, xa)
+	local l = Instance.new("TextLabel")
+	l.Size = size or UDim2.new(1,0,1,0)
+	l.Position = pos or UDim2.new(0,0,0,0)
+	l.BackgroundTransparency = 1
+	l.Text = text or ""
+	l.TextSize = tsz or 13
+	l.TextColor3 = col or Color3.fromRGB(200,200,215)
+	l.Font = font or Enum.Font.Gotham
+	l.ZIndex = zi or 1
+	l.TextXAlignment = xa or Enum.TextXAlignment.Left
+	l.TextWrapped = true
+	l.Parent = parent
+	return l
+end
+
+local function mkBtn(parent, text, size, pos, bg, tc, tsz, zi, rad)
+	local b = Instance.new("TextButton")
+	b.Size = size or UDim2.new(0,100,0,36)
+	b.Position = pos or UDim2.new(0,0,0,0)
+	b.BackgroundColor3 = bg or Color3.fromRGB(28,28,38)
+	b.BorderSizePixel = 0
+	b.Text = text or ""
+	b.TextColor3 = tc or Color3.fromRGB(200,200,215)
+	b.TextSize = tsz or 13
+	b.Font = Enum.Font.GothamBold
+	b.ZIndex = zi or 1
+	if rad then Instance.new("UICorner",b).CornerRadius = UDim.new(0,rad) end
+	b.Parent = parent
+	return b
+end
+
+local function mkBox(parent, ph, size, pos, zi, rad)
+	local tb = Instance.new("TextBox")
+	tb.Size = size or UDim2.new(0,160,0,32)
+	tb.Position = pos or UDim2.new(0,0,0,0)
+	tb.BackgroundColor3 = Color3.fromRGB(20,20,28)
+	tb.BorderSizePixel = 0
+	tb.PlaceholderText = ph or ""
+	tb.PlaceholderColor3 = Color3.fromRGB(80,80,100)
+	tb.Text = ""
+	tb.TextColor3 = Color3.fromRGB(200,200,215)
+	tb.TextSize = 13
+	tb.Font = Enum.Font.Gotham
+	tb.ClearTextOnFocus = false
+	tb.ZIndex = zi or 1
+	if rad then Instance.new("UICorner",tb).CornerRadius = UDim.new(0,rad) end
+	tb.Parent = parent
+	return tb
+end
+
+local function addStroke(parent, color, thickness)
+	local s = Instance.new("UIStroke")
+	s.Color = color or Color3.fromRGB(50,50,65)
+	s.Thickness = thickness or 1.2
+	s.Parent = parent
+	return s
+end
+
+local function addSnow(parent, count, zi)
+	local list = {}
+	for i = 1, count do
+		local sf = mkFrame(parent, UDim2.new(0,math.random(2,5),0,math.random(2,5)), UDim2.new(math.random(0,100)/100,0,math.random(-10,110)/100,0), Color3.fromRGB(210,218,230), zi or 1, 10)
+		sf.BackgroundTransparency = math.random(40,70)/100
+		list[i] = {frame=sf, speed=math.random(40,130)/1000, drift=math.random(-20,20)/1000, posY=math.random(-10,110)/100, posX=math.random(0,100)/100}
+	end
+	return list
+end
+
+local function tickSnow(list, dt)
+	for _, s in pairs(list) do
+		s.posY += s.speed * dt
+		s.posX += s.drift * dt
+		if s.posY > 1.05 then s.posY = -0.05 s.posX = math.random(0,100)/100 end
+		if s.posX < 0 then s.posX = 1 end
+		if s.posX > 1 then s.posX = 0 end
+		s.frame.Position = UDim2.new(s.posX,0,s.posY,0)
+	end
+end
+
+-- ============================================================
+-- KEY EKRANI
+-- ============================================================
+local keyFrame = mkFrame(SG, UDim2.new(0,430,0,300), UDim2.new(0.5,-215,0.5,-150), Color3.fromRGB(13,13,16), 50, 14)
+keyFrame.Visible = not isUnlocked
+addStroke(keyFrame, Color3.fromRGB(55,55,72), 1.2)
+
+local keySnowClip = mkFrame(keyFrame, UDim2.new(1,0,1,0), UDim2.new(0,0,0,0), Color3.fromRGB(0,0,0), 50, 14)
+keySnowClip.BackgroundTransparency = 1
+keySnowClip.ClipsDescendants = true
+local keySnowList = addSnow(keySnowClip, 22, 50)
+
+RunService.Heartbeat:Connect(function(dt)
+	if keyFrame.Visible then tickSnow(keySnowList, dt) end
+end)
+
+local keyLogoF = mkFrame(keyFrame, UDim2.new(0,44,0,32), UDim2.new(0,14,0,14), Color3.fromRGB(20,20,28), 52, 8)
+mkLabel(keyLogoF, "LS", UDim2.new(1,0,1,0), UDim2.new(0,0,0,0), 16, Color3.fromRGB(200,200,215), Enum.Font.GothamBold, 53, Enum.TextXAlignment.Center)
+local keyTitleLbl = mkLabel(keyFrame, "LEASTRA SHOP", UDim2.new(0,270,0,32), UDim2.new(0,64,0,14), 18, Color3.fromRGB(218,218,230), Enum.Font.GothamBold, 52)
+local keySubLbl = mkLabel(keyFrame, L.keyTitle, UDim2.new(0,400,0,22), UDim2.new(0,14,0,60), 13, Color3.fromRGB(115,115,140), Enum.Font.Gotham, 52)
+
+local keyBox = mkBox(keyFrame, L.keyPlaceholder, UDim2.new(0,400,0,40), UDim2.new(0,14,0,88), 52, 8)
+addStroke(keyBox, Color3.fromRGB(50,50,65), 1)
+
+local keyEnterBtn = mkBtn(keyFrame, L.keyBtn, UDim2.new(0,400,0,40), UDim2.new(0,14,0,136), Color3.fromRGB(24,24,34), Color3.fromRGB(188,188,210), 15, 52, 8)
+addStroke(keyEnterBtn, Color3.fromRGB(50,50,65), 1)
+
+local keyStatusLbl = mkLabel(keyFrame, "", UDim2.new(0,400,0,22), UDim2.new(0,14,0,182), 12, Color3.fromRGB(200,90,90), Enum.Font.Gotham, 52)
+local getKeyBtn = mkBtn(keyFrame, L.keyGet..discordLink, UDim2.new(0,400,0,34), UDim2.new(0,14,0,210), Color3.fromRGB(18,18,25), Color3.fromRGB(95,115,175), 12, 52, 8)
+
+onLangChange(function()
+	keySubLbl.Text = L.keyTitle
+	keyBox.PlaceholderText = L.keyPlaceholder
+	keyEnterBtn.Text = L.keyBtn
+	getKeyBtn.Text = L.keyGet..discordLink
+end)
+
+local function checkKey(k)
+	if not k or k == "" then return false, L.keyEmpty end
+	local d = keyDatabase[k]
+	if not d then return false, L.keyInvalid end
+	if not d.active then return false, L.keyDeactive end
+	if d.targetPlayer then
+		if tostring(d.targetPlayer) ~= tostring(player.UserId) and d.targetPlayer ~= player.Name then
+			return false, L.keyNotYours
+		end
+	end
+	if d.expireTime and os.time() > d.expireTime then d.active = false return false, L.keyExpired end
+	if d.uses then
+		if d.usedCount >= d.uses then return false, L.keyUsed end
+		d.usedCount += 1
+	end
+	return true, L.keySuccess
+end
+
+keyEnterBtn.MouseButton1Click:Connect(function()
+	local ok, msg = checkKey(keyBox.Text)
+	if ok then
+		isUnlocked = true
+		keyStatusLbl.TextColor3 = Color3.fromRGB(120,200,145)
+		keyStatusLbl.Text = msg
+		task.wait(0.6)
+		TweenService:Create(keyFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {Size=UDim2.new(0,430,0,0)}):Play()
+		task.wait(0.35)
+		keyFrame.Visible = false
+	else
+		keyStatusLbl.TextColor3 = Color3.fromRGB(210,90,90)
+		keyStatusLbl.Text = msg
+	end
+end)
+getKeyBtn.MouseButton1Click:Connect(function()
+	keyStatusLbl.TextColor3 = Color3.fromRGB(95,120,200)
+	keyStatusLbl.Text = "Discord: "..discordLink
+end)
+
+-- ============================================================
+-- DIL SEÇİCİ PANEL
+-- ============================================================
+local langPanelOpen = false
+local langPanel = mkFrame(SG, UDim2.new(0,200,0,180), UDim2.new(0,0,0,0), Color3.fromRGB(13,13,16), 60, 10)
+langPanel.Visible = false
+addStroke(langPanel, Color3.fromRGB(55,55,72), 1.2)
+
+local langPanelTitle = mkLabel(langPanel, "🌐 Language / Dil", UDim2.new(1,0,0,28), UDim2.new(0,0,0,0), 12, Color3.fromRGB(188,188,210), Enum.Font.GothamBold, 61, Enum.TextXAlignment.Center)
+
+local langList = {
+	{"TR", "🇹🇷  Türkçe"},
+	{"EN", "🇬🇧  English"},
+	{"DE", "🇩🇪  Deutsch"},
+	{"FR", "🇫🇷  Français"},
+	{"ES", "🇪🇸  Español"},
+}
+
+for i, ld in pairs(langList) do
+	local code = ld[1]
+	local label = ld[2]
+	local lb = mkBtn(langPanel, label, UDim2.new(1,-10,0,26), UDim2.new(0,5,0,28+(i-1)*29), Color3.fromRGB(20,20,28), Color3.fromRGB(188,188,210), 12, 62, 6)
+	lb.TextXAlignment = Enum.TextXAlignment.Left
+	local lbp = Instance.new("UIPadding") lbp.PaddingLeft = UDim.new(0,8) lbp.Parent = lb
+	lb.MouseButton1Click:Connect(function()
+		setLang(code)
+		for _, c in pairs(langPanel:GetChildren()) do
+			if c:IsA("TextButton") then
+				c.BackgroundColor3 = Color3.fromRGB(20,20,28)
+				c.TextColor3 = Color3.fromRGB(188,188,210)
+			end
+		end
+		lb.BackgroundColor3 = Color3.fromRGB(38,38,52)
+		lb.TextColor3 = Color3.fromRGB(210,210,228)
+	end)
+	if code == currentLang then
+		lb.BackgroundColor3 = Color3.fromRGB(38,38,52)
+		lb.TextColor3 = Color3.fromRGB(210,210,228)
+	end
+end
+
+-- ============================================================
+-- ANA UI
+-- ============================================================
+local mainFrame = mkFrame(SG, UDim2.new(0,660,0,520), UDim2.new(0.5,-330,0.5,-260), Color3.fromRGB(13,13,16), 10, 14)
+mainFrame.Visible = false
+addStroke(mainFrame, Color3.fromRGB(50,50,65), 1.2)
+
+local mainSnowClip = mkFrame(mainFrame, UDim2.new(1,0,1,0), UDim2.new(0,0,0,0), Color3.fromRGB(0,0,0), 10, 14)
+mainSnowClip.BackgroundTransparency = 1
+mainSnowClip.ClipsDescendants = true
+local mainSnowList = addSnow(mainSnowClip, 28, 10)
+RunService.Heartbeat:Connect(function(dt)
+	if mainFrame.Visible then tickSnow(mainSnowList, dt) end
+end)
+
+-- HEADER
+local header = mkFrame(mainFrame, UDim2.new(1,0,0,50), UDim2.new(0,0,0,0), Color3.fromRGB(16,16,20), 12, 14)
+mkFrame(header, UDim2.new(1,0,0.5,0), UDim2.new(0,0,0.5,0), Color3.fromRGB(16,16,20), 12)
+
+local logoF = mkFrame(header, UDim2.new(0,38,0,28), UDim2.new(0,12,0.5,-14), Color3.fromRGB(22,22,30), 13, 7)
+mkLabel(logoF, "LS", UDim2.new(1,0,1,0), UDim2.new(0,0,0,0), 15, Color3.fromRGB(200,200,215), Enum.Font.GothamBold, 14, Enum.TextXAlignment.Center)
+local headerTitle = mkLabel(header, "LEASTRA SHOP", UDim2.new(0,200,1,0), UDim2.new(0,58,0,0), 16, Color3.fromRGB(218,218,230), Enum.Font.GothamBold, 13)
+
+-- Dil butonu - header'da
+local langTogBtn = mkBtn(header, "🌐 "..L.langBtn, UDim2.new(0,72,0,28), UDim2.new(1,-118,0.5,-14), Color3.fromRGB(22,22,32), Color3.fromRGB(170,170,200), 11, 14, 6)
+addStroke(langTogBtn, Color3.fromRGB(46,46,62), 1)
+
+local closeBtn = mkBtn(header, "X", UDim2.new(0,30,0,30), UDim2.new(1,-40,0.5,-15), Color3.fromRGB(35,35,48), Color3.fromRGB(175,175,195), 14, 14, 7)
+
+onLangChange(function()
+	langTogBtn.Text = "🌐 "..L.langBtn
+end)
+
+langTogBtn.MouseButton1Click:Connect(function()
+	langPanelOpen = not langPanelOpen
+	if langPanelOpen then
+		local abs = langTogBtn.AbsolutePosition
+		langPanel.Position = UDim2.new(0, abs.X, 0, abs.Y + 34)
+		langPanel.Visible = true
+	else
+		langPanel.Visible = false
+	end
+end)
+
+-- Drag
+header.InputBegan:Connect(function(inp)
+	if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
+		isDragging = true dragStart = inp.Position startPos = mainFrame.Position
+	end
+end)
+header.InputChanged:Connect(function(inp)
+	if isDragging and (inp.UserInputType == Enum.UserInputType.MouseMovement or inp.UserInputType == Enum.UserInputType.Touch) then
+		local d = inp.Position - dragStart
+		mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset+d.X, startPos.Y.Scale, startPos.Y.Offset+d.Y)
+	end
+end)
+UserInputService.InputEnded:Connect(function(inp)
+	if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
+		isDragging = false
+	end
+end)
+
+local bodyFrame = mkFrame(mainFrame, UDim2.new(1,0,1,-56), UDim2.new(0,0,0,50), Color3.fromRGB(0,0,0), 11)
+bodyFrame.BackgroundTransparency = 1
+
+local sideBar = mkFrame(bodyFrame, UDim2.new(0,130,1,-8), UDim2.new(0,8,0,4), Color3.fromRGB(16,16,20), 12, 10)
+addStroke(sideBar, Color3.fromRGB(42,42,56), 1)
+
+local sideLayout = Instance.new("UIListLayout")
+sideLayout.Padding = UDim.new(0,3)
+sideLayout.SortOrder = Enum.SortOrder.LayoutOrder
+sideLayout.Parent = sideBar
+local sidePad = Instance.new("UIPadding")
+sidePad.PaddingTop = UDim.new(0,6)
+sidePad.PaddingLeft = UDim.new(0,5)
+sidePad.PaddingRight = UDim.new(0,5)
+sidePad.Parent = sideBar
+
+local contentArea = mkFrame(bodyFrame, UDim2.new(1,-148,1,-8), UDim2.new(0,144,0,4), Color3.fromRGB(0,0,0), 11)
+contentArea.BackgroundTransparency = 1
+
+local footerLbl = mkLabel(mainFrame, L.footer, UDim2.new(1,0,0,18), UDim2.new(0,0,1,-20), 10, Color3.fromRGB(55,55,72), Enum.Font.Gotham, 11, Enum.TextXAlignment.Center)
+onLangChange(function() footerLbl.Text = L.footer end)
+
+-- ============================================================
+-- SIDEBAR SEKME SISTEMI
+-- ============================================================
+local allSideBtns = {}
+local allContents = {}
+local activeTabName = nil
+
+local function createSideTab(name, icon, labelKey)
+	local btn = mkBtn(sideBar, icon.."  "..L[labelKey], UDim2.new(1,0,0,36), UDim2.new(0,0,0,0), Color3.fromRGB(20,20,28), Color3.fromRGB(108,108,132), 11, 13, 7)
+	btn.Font = Enum.Font.Gotham
+	btn.TextXAlignment = Enum.TextXAlignment.Left
+	local bp = Instance.new("UIPadding")
+	bp.PaddingLeft = UDim.new(0,8)
+	bp.Parent = btn
+
+	onLangChange(function()
+		btn.Text = icon.."  "..L[labelKey]
+	end)
+
+	local scroll = Instance.new("ScrollingFrame")
+	scroll.Size = UDim2.new(1,0,1,0)
+	scroll.BackgroundTransparency = 1
+	scroll.BorderSizePixel = 0
+	scroll.ScrollBarThickness = 3
+	scroll.ScrollBarImageColor3 = Color3.fromRGB(60,60,80)
+	scroll.CanvasSize = UDim2.new(0,0,0,0)
+	scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	scroll.Visible = false
+	scroll.ZIndex = 11
+	scroll.Parent = contentArea
+	local sl = Instance.new("UIListLayout")
+	sl.Padding = UDim.new(0,5)
+	sl.SortOrder = Enum.SortOrder.LayoutOrder
+	sl.Parent = scroll
+	local sp = Instance.new("UIPadding")
+	sp.PaddingTop = UDim.new(0,4)
+	sp.PaddingBottom = UDim.new(0,10)
+	sp.PaddingRight = UDim.new(0,4)
+	sp.Parent = scroll
+
+	allSideBtns[name] = btn
+	allContents[name] = scroll
+
+	btn.MouseButton1Click:Connect(function()
+		for n, c in pairs(allContents) do
+			c.Visible = false
+			allSideBtns[n].BackgroundColor3 = Color3.fromRGB(20,20,28)
+			allSideBtns[n].TextColor3 = Color3.fromRGB(108,108,132)
+		end
+		scroll.Visible = true
+		btn.BackgroundColor3 = Color3.fromRGB(38,38,52)
+		btn.TextColor3 = Color3.fromRGB(210,210,228)
+		activeTabName = name
+	end)
+
+	return scroll
+end
+
+local tWeapon  = createSideTab("w",  "|>", "tabWeapon")
+local tPolWeap = createSideTab("pw", "**", "tabPolWeap")
+local tCivCar  = createSideTab("cc", "[]", "tabCivCar")
+local tPolCar  = createSideTab("pc", "()", "tabPolCar")
+local tCombat  = createSideTab("cb", "/\\", "tabCombat")
+local tLoot    = createSideTab("lo", ">>", "tabLoot")
+local tMoney   = createSideTab("mo", "$$", "tabMoney")
+
+allSideBtns["w"].BackgroundColor3 = Color3.fromRGB(38,38,52)
+allSideBtns["w"].TextColor3 = Color3.fromRGB(210,210,228)
+allContents["w"].Visible = true
+activeTabName = "w"
+
+-- ============================================================
+-- ICERIK YARDIMCILARI
+-- ============================================================
+local loCounter = {}
+
+local function secHead(parent, textKey)
+	if not loCounter[parent] then loCounter[parent] = 1 end
+	local f = mkFrame(parent, UDim2.new(1,0,0,24), UDim2.new(0,0,0,0), Color3.fromRGB(20,20,27), 12, 6)
+	f.LayoutOrder = loCounter[parent]
+	loCounter[parent] += 1
+	local lbl = mkLabel(f, L[textKey], UDim2.new(1,-10,1,0), UDim2.new(0,10,0,0), 11, Color3.fromRGB(135,135,160), Enum.Font.GothamBold, 13)
+	onLangChange(function() lbl.Text = L[textKey] end)
+	return f
+end
+
+local function itemBtn(parent, name)
+	if not loCounter[parent] then loCounter[parent] = 1 end
+	local row = mkFrame(parent, UDim2.new(1,0,0,42), UDim2.new(0,0,0,0), Color3.fromRGB(18,18,24), 12, 7)
+	row.LayoutOrder = loCounter[parent]
+	loCounter[parent] += 1
+	addStroke(row, Color3.fromRGB(34,34,48), 1)
+
+	mkFrame(row, UDim2.new(0,3,0,26), UDim2.new(0,7,0.5,-13), Color3.fromRGB(138,138,165), 13, 2)
+	mkLabel(row, name, UDim2.new(0.5,0,1,0), UDim2.new(0,18,0,0), 12, Color3.fromRGB(190,190,210), Enum.Font.Gotham, 13)
+
+	local cntVal = 1
+	local cntF = mkFrame(row, UDim2.new(0,68,0,26), UDim2.new(1,-152,0.5,-13), Color3.fromRGB(22,22,30), 13, 5)
+	addStroke(cntF, Color3.fromRGB(42,42,58), 1)
+	local mB = mkBtn(cntF, "-", UDim2.new(0,20,1,0), UDim2.new(0,0,0,0), Color3.fromRGB(0,0,0), Color3.fromRGB(180,180,200), 15, 14)
+	mB.BackgroundTransparency = 1
+	local cL = mkLabel(cntF, "1", UDim2.new(0,28,1,0), UDim2.new(0,20,0,0), 12, Color3.fromRGB(200,200,215), Enum.Font.GothamBold, 14, Enum.TextXAlignment.Center)
+	local pB = mkBtn(cntF, "+", UDim2.new(0,20,1,0), UDim2.new(0,48,0,0), Color3.fromRGB(0,0,0), Color3.fromRGB(180,180,200), 15, 14)
+	pB.BackgroundTransparency = 1
+	mB.MouseButton1Click:Connect(function() cntVal = math.max(1,cntVal-1) cL.Text = tostring(cntVal) end)
+	pB.MouseButton1Click:Connect(function() cntVal = math.min(100,cntVal+1) cL.Text = tostring(cntVal) end)
+
+	local getB = mkBtn(row, L.getBtn, UDim2.new(0,75,0,26), UDim2.new(1,-80,0.5,-13), Color3.fromRGB(26,26,40), Color3.fromRGB(170,170,200), 12, 14, 5)
+	addStroke(getB, Color3.fromRGB(46,46,62), 1)
+
+	onLangChange(function()
+		if getB.Text ~= L.keyRequired and getB.Text ~= L.notFound then
+			getB.Text = L.getBtn
+		end
+	end)
+
+	getB.MouseEnter:Connect(function() TweenService:Create(getB, TweenInfo.new(0.1), {BackgroundColor3=Color3.fromRGB(40,40,58)}):Play() end)
+	getB.MouseLeave:Connect(function() TweenService:Create(getB, TweenInfo.new(0.1), {BackgroundColor3=Color3.fromRGB(26,26,40)}):Play() end)
+
+	getB.MouseButton1Click:Connect(function()
+		if not isUnlocked then getB.Text=L.keyRequired task.wait(1.5) getB.Text=L.getBtn return end
+		local bp = player:WaitForChild("Backpack")
+		local found = nil
+		for _, loc in pairs({ReplicatedStorage, ReplicatedStorage:FindFirstChild("Loot Player Storage")}) do
+			if loc then
+				local f2 = loc:FindFirstChild(name, true)
+				if f2 then found = f2 break end
+			end
+		end
+		if found then
+			for i = 1, cntVal do found:Clone().Parent = bp end
+			getB.Text = "x"..cntVal.." "..L.given
+			getB.TextColor3 = Color3.fromRGB(115,196,140)
+			task.wait(1.5)
+			getB.Text = L.getBtn
+			getB.TextColor3 = Color3.fromRGB(170,170,200)
+		else
+			getB.Text = L.notFound
+			getB.TextColor3 = Color3.fromRGB(205,85,85)
+			task.wait(1.5)
+			getB.Text = L.getBtn
+			getB.TextColor3 = Color3.fromRGB(170,170,200)
+		end
+	end)
+	return row
+end
+
+-- ============================================================
+-- SILAHLAR
+-- ============================================================
+secHead(tWeapon, "secWeapon")
+local weapons = {
+	"100Round ARSco","AR Pistol","AR Pistol Drum","AR15 Pistol","Berreta M9",
+	"Boombox","CC 0","CC 100","Check 0","Check 100","Draco","DracoDrum",
+	"FiveSeven","FiveSevenDrum","Glock 17","M249","M4A1","MK18","MP7",
+	"Micro AR Pistol","Micro AR Pistol D","Mop","Ruger","SpringfieldXD Sw",
+	"Taurus G2C Drum","Tec 9","Uzi","BlankCard","C4","Diamond Cartier",
+	"Diamond Link Ch","Drill","Glock 19 Drum","Gold Cartier Wat","JAYS M249",
+	"Katana","Laptop","Lockpick","SCAR","SPOOKY SCAR","Steel Cartier Wat",
+	"AK47","Punchmade Chai",
+}
+for _, w in pairs(weapons) do itemBtn(tWeapon, w) end
+
+secHead(tPolWeap, "secPolWeap")
+for _, w in pairs({"Glock 19S","M4A1S","M4A1","MP5","SPAS Shotgun","Taser"}) do
+	itemBtn(tPolWeap, w)
+end
+
+secHead(tCivCar, "secCivCar")
+local civCars = {
+	"Civ car 1","Civ car 2","Civ car 4","Civ car 6","Civ car 7","Civ car 9",
+	"Civ car 11","Civ car 12","Civ car 13","Civ car 15","Civ car 16",
+	"Civ car 17","Civ car 18","Civ car 19","Civ car 20","Civ car 21",
+	"Civ car 22","Civ car 23","Civ car 24","DuneBuggy","Duran",
+	"ElectricTruck","GT3","L STO","Skyview","Vette","Wagon",
+}
+for _, c in pairs(civCars) do itemBtn(tCivCar, c) end
+
+secHead(tPolCar, "secPolCar")
+for _, c in pairs({"PChevyCaprice","PChevyTahoe","PDodgeCharger","PExplorer","PTaurus"}) do
+	itemBtn(tPolCar, c)
+end
+
+-- ============================================================
+-- SAVAS
+-- ============================================================
+secHead(tCombat, "secCombat")
+
+local function togRow(parent, labelKey)
+	if not loCounter[parent] then loCounter[parent] = 1 end
+	local row = mkFrame(parent, UDim2.new(1,0,0,46), UDim2.new(0,0,0,0), Color3.fromRGB(18,18,24), 12, 7)
+	row.LayoutOrder = loCounter[parent]
+	loCounter[parent] += 1
+	addStroke(row, Color3.fromRGB(34,34,48), 1)
+
+	local lbl = mkLabel(row, L[labelKey], UDim2.new(0.56,0,1,0), UDim2.new(0,14,0,0), 12, Color3.fromRGB(186,186,208), Enum.Font.Gotham, 13)
+	onLangChange(function() lbl.Text = L[labelKey] end)
+
+	local stF = mkFrame(row, UDim2.new(0,56,0,20), UDim2.new(0.56,0,0.5,-10), Color3.fromRGB(50,20,20), 13, 5)
+	local stL = mkLabel(stF, L.off, UDim2.new(1,0,1,0), UDim2.new(0,0,0,0), 9, Color3.fromRGB(205,85,85), Enum.Font.GothamBold, 14, Enum.TextXAlignment.Center)
+
+	local tB = mkBtn(row, L.open, UDim2.new(0,66,0,26), UDim2.new(1,-72,0.5,-13), Color3.fromRGB(24,24,36), Color3.fromRGB(170,170,200), 12, 14, 5)
+	addStroke(tB, Color3.fromRGB(46,46,62), 1)
+
+	local on = false
+	onLangChange(function()
+		stL.Text = on and L.on or L.off
+		tB.Text = on and L.close or L.open
+	end)
+
+	tB.MouseButton1Click:Connect(function()
+		if not isUnlocked then return end
+		on = not on
+		if on then
+			tB.Text = L.close tB.TextColor3 = Color3.fromRGB(115,196,140)
+			stL.Text = L.on stL.TextColor3 = Color3.fromRGB(115,196,140)
+			stF.BackgroundColor3 = Color3.fromRGB(18,46,24)
+		else
+			tB.Text = L.open tB.TextColor3 = Color3.fromRGB(170,170,200)
+			stL.Text = L.off stL.TextColor3 = Color3.fromRGB(205,85,85)
+			stF.BackgroundColor3 = Color3.fromRGB(50,20,20)
+		end
+	end)
+	return function() return on end
+end
+
+local getInfAmmo = togRow(tCombat, "infAmmo")
+local getNoRecoil = togRow(tCombat, "noRecoil")
+
+if not loCounter[tCombat] then loCounter[tCombat] = 1 end
+local ammoRow = mkFrame(tCombat, UDim2.new(1,0,0,44), UDim2.new(0,0,0,0), Color3.fromRGB(18,18,24), 12, 7)
+ammoRow.LayoutOrder = loCounter[tCombat]
+loCounter[tCombat] += 1
+addStroke(ammoRow, Color3.fromRGB(34,34,48), 1)
+local ammoLbl = mkLabel(ammoRow, L.ammoCount, UDim2.new(0.45,0,1,0), UDim2.new(0,14,0,0), 12, Color3.fromRGB(165,165,188), Enum.Font.Gotham, 13)
+onLangChange(function() ammoLbl.Text = L.ammoCount end)
+local amR = mkBtn(ammoRow, "-", UDim2.new(0,28,0,28), UDim2.new(0.48,0,0.5,-14), Color3.fromRGB(24,24,36), Color3.fromRGB(180,180,200), 15, 14, 5)
+local amL = mkLabel(ammoRow, "30", UDim2.new(0,42,0,28), UDim2.new(0.48,30,0.5,-14), 13, Color3.fromRGB(200,200,215), Enum.Font.GothamBold, 13, Enum.TextXAlignment.Center)
+local amP = mkBtn(ammoRow, "+", UDim2.new(0,28,0,28), UDim2.new(0.48,74,0.5,-14), Color3.fromRGB(24,24,36), Color3.fromRGB(180,180,200), 15, 14, 5)
+amR.MouseButton1Click:Connect(function() infAmmoCnt = math.max(1,infAmmoCnt-1) amL.Text = tostring(infAmmoCnt) end)
+amP.MouseButton1Click:Connect(function() infAmmoCnt = math.min(9999,infAmmoCnt+1) amL.Text = tostring(infAmmoCnt) end)
+
+RunService.Heartbeat:Connect(function()
+	if not getInfAmmo() or not isUnlocked then return end
+	local char = player.Character
+	if not char then return end
+	local tool = char:FindFirstChildOfClass("Tool")
+	if not tool then return end
+	for _, v in pairs(tool:GetDescendants()) do
+		if v:IsA("IntValue") then
+			local n = v.Name:lower()
+			if n:find("ammo") or n:find("bullet") or n:find("mag") then v.Value = infAmmoCnt end
+		end
+	end
+end)
+
+-- ============================================================
+-- LOOT
+-- ============================================================
+secHead(tLoot, "secLoot")
+
+if not loCounter[tLoot] then loCounter[tLoot] = 1 end
+local lootInfoF = mkFrame(tLoot, UDim2.new(1,0,0,28), UDim2.new(0,0,0,0), Color3.fromRGB(18,18,24), 12, 6)
+lootInfoF.LayoutOrder = loCounter[tLoot] loCounter[tLoot] += 1
+local lootInfoLbl = mkLabel(lootInfoF, L.lootInfo, UDim2.new(1,-10,1,0), UDim2.new(0,8,0,0), 11, Color3.fromRGB(122,122,145), Enum.Font.Gotham, 13)
+onLangChange(function() lootInfoLbl.Text = L.lootInfo end)
+
+local lootBtn2 = mkBtn(tLoot, L.lootBtn, UDim2.new(1,0,0,44), UDim2.new(0,0,0,0), Color3.fromRGB(22,22,32), Color3.fromRGB(186,186,210), 14, 12, 7)
+lootBtn2.LayoutOrder = loCounter[tLoot] loCounter[tLoot] += 1
+addStroke(lootBtn2, Color3.fromRGB(46,46,64), 1)
+onLangChange(function() lootBtn2.Text = L.lootBtn end)
+
+local lootStLbl = mkLabel(tLoot, L.lootReady, UDim2.new(1,0,0,22), UDim2.new(0,0,0,0), 12, Color3.fromRGB(110,180,130), Enum.Font.Gotham, 12)
+lootStLbl.LayoutOrder = loCounter[tLoot] loCounter[tLoot] += 1
+onLangChange(function() lootStLbl.Text = L.lootReady end)
+
+local curFolderIdx = 1
+local function getItemsDeep(folder)
+	local res = {}
+	for _, c in pairs(folder:GetChildren()) do
+		if c:IsA("Tool") or c:IsA("HopperBin") or c:IsA("Accessory") then table.insert(res, c) end
+		if c:IsA("Folder") or c:IsA("Model") or c:IsA("Configuration") then
+			for _, i in pairs(getItemsDeep(c)) do table.insert(res, i) end
+		end
+	end
+	return res
+end
+
+lootBtn2.MouseButton1Click:Connect(function()
+	if not isUnlocked then lootStLbl.Text = L.lootKeyReq return end
+	local lps = ReplicatedStorage:FindFirstChild("Loot Player Storage")
+	if not lps then lootStLbl.Text = L.lootNoStorage return end
+	local toos = lps:FindFirstChild("ToosLoot")
+	if not toos then lootStLbl.Text = L.lootNoToos return end
+	local folders = toos:GetChildren()
+	if #folders == 0 then lootStLbl.Text = L.lootNoFolder return end
+	if curFolderIdx > #folders then curFolderIdx = 1 end
+	local cur = folders[curFolderIdx]
+	local bp = player:WaitForChild("Backpack")
+	local cnt = 0
+	for _, item in pairs(getItemsDeep(cur)) do item:Clone().Parent = bp cnt += 1 end
+	lootStLbl.Text = cur.Name.." - "..cnt.." item"
+	lootBtn2.Text = cur.Name.." ("..cnt..")"
+	curFolderIdx += 1
+	task.wait(2)
+	lootBtn2.Text = curFolderIdx <= #folders and (L.lootNext..folders[curFolderIdx].Name) or L.lootAllDone
+end)
+
+-- ============================================================
+-- PARA
+-- ============================================================
+secHead(tMoney, "secMoney")
+
+if not loCounter[tMoney] then loCounter[tMoney] = 1 end
+
+local mRow = mkFrame(tMoney, UDim2.new(1,0,0,44), UDim2.new(0,0,0,0), Color3.fromRGB(18,18,24), 12, 7)
+mRow.LayoutOrder = loCounter[tMoney] loCounter[tMoney] += 1
+addStroke(mRow, Color3.fromRGB(34,34,48), 1)
+local mAmtLbl = mkLabel(mRow, L.moneyAmount, UDim2.new(0,80,1,0), UDim2.new(0,10,0,0), 12, Color3.fromRGB(150,150,175), Enum.Font.Gotham, 13)
+onLangChange(function() mAmtLbl.Text = L.moneyAmount end)
+local mInput = mkBox(mRow, L.moneyPlaceholder, UDim2.new(1,-98,0,30), UDim2.new(0,90,0.5,-15), 13, 6)
+mInput.Text = "10000"
+addStroke(mInput, Color3.fromRGB(46,46,62), 1)
+onLangChange(function() mInput.PlaceholderText = L.moneyPlaceholder end)
+
+local quickRow = mkFrame(tMoney, UDim2.new(1,0,0,34), UDim2.new(0,0,0,0), Color3.fromRGB(0,0,0), 12)
+quickRow.BackgroundTransparency = 1
+quickRow.LayoutOrder = loCounter[tMoney] loCounter[tMoney] += 1
+local qLayout = Instance.new("UIListLayout")
+qLayout.FillDirection = Enum.FillDirection.Horizontal
+qLayout.Padding = UDim.new(0,5)
+qLayout.Parent = quickRow
+
+for _, amt in pairs({500, 1000, 5000, 10000, 50000, 100000}) do
+	local qb = mkBtn(quickRow, tostring(amt), UDim2.new(0,0,1,0), UDim2.new(0,0,0,0), Color3.fromRGB(20,20,28), Color3.fromRGB(150,150,180), 11, 13, 6)
+	qb.AutomaticSize = Enum.AutomaticSize.X
+	addStroke(qb, Color3.fromRGB(40,40,56), 1)
+	local bp2 = Instance.new("UIPadding")
+	bp2.PaddingLeft = UDim.new(0,6)
+	bp2.PaddingRight = UDim.new(0,6)
+	bp2.Parent = qb
+	local a2 = amt
+	qb.MouseButton1Click:Connect(function() mInput.Text = tostring(a2) end)
+end
+
+local giveMonBtn = mkBtn(tMoney, L.moneyBtn, UDim2.new(1,0,0,42), UDim2.new(0,0,0,0), Color3.fromRGB(18,30,22), Color3.fromRGB(125,196,145), 14, 12, 7)
+giveMonBtn.LayoutOrder = loCounter[tMoney] loCounter[tMoney] += 1
+addStroke(giveMonBtn, Color3.fromRGB(30,52,36), 1)
+onLangChange(function() giveMonBtn.Text = L.moneyBtn end)
+
+local mStatusLbl = mkLabel(tMoney, L.moneyReady, UDim2.new(1,0,0,22), UDim2.new(0,0,0,0), 12, Color3.fromRGB(110,180,130), Enum.Font.Gotham, 12)
+mStatusLbl.LayoutOrder = loCounter[tMoney] loCounter[tMoney] += 1
+onLangChange(function() mStatusLbl.Text = L.moneyReady end)
+
+local function tryGiveMoney(amount)
+	local remoteNames = {
+		"GiveCash","giveCash","GetCash","getCash",
+		"GiveMoney","giveMoney","transferCash",
+		"codeEvent","cashEvent","notificationEvent",
+		"DailyRewards","InviteRewards","PlayTimeRewards",
+	}
+	local foundRemote = nil
+	local function deepSearch(parent)
+		if not parent then return nil end
+		for _, child in pairs(parent:GetChildren()) do
+			if child:IsA("RemoteEvent") or child:IsA("RemoteFunction") then
+				local n = child.Name:lower()
+				if n:find("cash") or n:find("money") or n:find("give") or n:find("reward") then return child end
+			end
+			local f2 = deepSearch(child)
+			if f2 then return f2 end
+		end
+		return nil
+	end
+	for _, rn in pairs(remoteNames) do
+		local r = ReplicatedStorage:FindFirstChild(rn, true)
+		if r then foundRemote = r break end
+	end
+	if not foundRemote then foundRemote = deepSearch(ReplicatedStorage) end
+	if foundRemote then
+		local ok, err = pcall(function()
+			if foundRemote:IsA("RemoteFunction") then foundRemote:InvokeServer(amount)
+			elseif foundRemote:IsA("RemoteEvent") then foundRemote:FireServer(amount) end
+		end)
+		return ok, ok and ("Remote: "..foundRemote.Name) or tostring(err)
+	end
+	return false, L.moneyNoRemote
+end
+
+giveMonBtn.MouseButton1Click:Connect(function()
+	if not isUnlocked then mStatusLbl.Text = L.moneyKeyReq return end
+	local amt = tonumber(mInput.Text)
+	if not amt or amt <= 0 then
+		mStatusLbl.Text = L.moneyInvalid
+		mStatusLbl.TextColor3 = Color3.fromRGB(205,85,85)
+		task.wait(2)
+		mStatusLbl.Text = L.moneyReady
+		mStatusLbl.TextColor3 = Color3.fromRGB(110,180,130)
+		return
+	end
+	mStatusLbl.Text = L.moneyTrying
+	mStatusLbl.TextColor3 = Color3.fromRGB(150,150,180)
+	local ok, msg = tryGiveMoney(amt)
+	if ok then
+		mStatusLbl.Text = amt..L.moneyGiven..msg
+		mStatusLbl.TextColor3 = Color3.fromRGB(115,196,140)
+	else
+		mStatusLbl.Text = L.moneyError..msg
+		mStatusLbl.TextColor3 = Color3.fromRGB(205,85,85)
+	end
+	task.wait(3)
+	mStatusLbl.Text = L.moneyReady
+	mStatusLbl.TextColor3 = Color3.fromRGB(110,180,130)
+end)
+
+-- ============================================================
+-- UI AC/KAPAT
+-- ============================================================
+local function toggleUI()
+	if not isUnlocked then
+		keyFrame.Visible = true
+		return
+	end
+	uiOpen = not uiOpen
+	if langPanelOpen then langPanel.Visible = false langPanelOpen = false end
+	if uiOpen then
+		mainFrame.Position = UDim2.new(0.5,-330,0.5,-260)
+		mainFrame.Visible = true
+		mainFrame.Size = UDim2.new(0,640,0,0)
+		TweenService:Create(mainFrame, TweenInfo.new(0.28, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size=UDim2.new(0,660,0,520)}):Play()
+	else
+		TweenService:Create(mainFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quint), {Size=UDim2.new(0,640,0,0)}):Play()
+		task.wait(0.22)
+		mainFrame.Visible = false
+	end
+end
+
+closeBtn.MouseButton1Click:Connect(toggleUI)
+UserInputService.InputBegan:Connect(function(inp, gp)
+	if gp then return end
+	if inp.KeyCode == Enum.KeyCode.RightControl then toggleUI() end
+end)
+
+local mobBtn = mkBtn(SG, "LS", UDim2.new(0,52,0,52), UDim2.new(0,10,0.5,-26), Color3.fromRGB(16,16,20), Color3.fromRGB(200,200,215), 15, 5, 12)
+addStroke(mobBtn, Color3.fromRGB(48,48,64), 1.2)
+mobBtn.Visible = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
+mobBtn.MouseButton1Click:Connect(toggleUI)
+
+-- ============================================================
+-- ADMIN PANEL
+-- ============================================================
+if isAdmin then
+	print("[Leastra] ADMIN PANEL AKTIF - ID:"..player.UserId)
+
+	local adminOpen = false
+	local adminFrame2 = mkFrame(SG, UDim2.new(0,530,0,650), UDim2.new(0.5,-265,0.5,-325), Color3.fromRGB(11,11,14), 30, 14)
+	adminFrame2.Visible = false
+	addStroke(adminFrame2, Color3.fromRGB(78,40,115), 1.5)
+
+	local adSnowClip = mkFrame(adminFrame2, UDim2.new(1,0,1,0), UDim2.new(0,0,0,0), Color3.fromRGB(0,0,0), 30, 14)
+	adSnowClip.BackgroundTransparency = 1
+	adSnowClip.ClipsDescendants = true
+	local adSnowList = addSnow(adSnowClip, 18, 30)
+	RunService.Heartbeat:Connect(function(dt)
+		if adminFrame2.Visible then tickSnow(adSnowList, dt) end
+	end)
+
+	local adHdr = mkFrame(adminFrame2, UDim2.new(1,0,0,50), UDim2.new(0,0,0,0), Color3.fromRGB(14,8,21), 32, 14)
+	mkFrame(adHdr, UDim2.new(1,0,0.5,0), UDim2.new(0,0,0.5,0), Color3.fromRGB(14,8,21), 32)
+	local adTitleLbl = mkLabel(adHdr, L.adminTitle, UDim2.new(0.75,0,1,0), UDim2.new(0,14,0,0), 15, Color3.fromRGB(192,162,228), Enum.Font.GothamBold, 33)
+	onLangChange(function() adTitleLbl.Text = L.adminTitle end)
+	local adClose = mkBtn(adHdr, "X", UDim2.new(0,30,0,30), UDim2.new(1,-40,0.5,-15), Color3.fromRGB(30,15,44), Color3.fromRGB(172,135,205), 14, 34, 7)
+
+	local adDrStart, adDrPos
+	local adDragging = false
+	adHdr.InputBegan:Connect(function(inp)
+		if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
+			adDragging = true adDrStart = inp.Position adDrPos = adminFrame2.Position
+		end
+	end)
+	adHdr.InputChanged:Connect(function(inp)
+		if adDragging and (inp.UserInputType == Enum.UserInputType.MouseMovement or inp.UserInputType == Enum.UserInputType.Touch) then
+			local d = inp.Position - adDrStart
+			adminFrame2.Position = UDim2.new(adDrPos.X.Scale, adDrPos.X.Offset+d.X, adDrPos.Y.Scale, adDrPos.Y.Offset+d.Y)
+		end
+	end)
+	UserInputService.InputEnded:Connect(function(inp)
+		if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
+			adDragging = false
+		end
+	end)
+
+	local adScroll = Instance.new("ScrollingFrame")
+	adScroll.Size = UDim2.new(1,-16,1,-58)
+	adScroll.Position = UDim2.new(0,8,0,54)
+	adScroll.BackgroundTransparency = 1
+	adScroll.BorderSizePixel = 0
+	adScroll.ScrollBarThickness = 3
+	adScroll.ScrollBarImageColor3 = Color3.fromRGB(82,40,118)
+	adScroll.CanvasSize = UDim2.new(0,0,0,0)
+	adScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	adScroll.ZIndex = 31
+	adScroll.Parent = adminFrame2
+	local adL = Instance.new("UIListLayout")
+	adL.Padding = UDim.new(0,7)
+	adL.SortOrder = Enum.SortOrder.LayoutOrder
+	adL.Parent = adScroll
+	local adP = Instance.new("UIPadding")
+	adP.PaddingTop = UDim.new(0,4)
+	adP.PaddingBottom = UDim.new(0,14)
+	adP.Parent = adScroll
+
+	local adLo = 1
+
+	local function adSec(textKey)
+		local f = mkFrame(adScroll, UDim2.new(1,0,0,24), UDim2.new(0,0,0,0), Color3.fromRGB(20,10,30), 32, 6)
+		f.LayoutOrder = adLo adLo += 1
+		local lbl = mkLabel(f, L[textKey], UDim2.new(1,-10,1,0), UDim2.new(0,10,0,0), 11, Color3.fromRGB(170,126,208), Enum.Font.GothamBold, 33)
+		onLangChange(function() lbl.Text = L[textKey] end)
+		return f
+	end
+
+	local function adRow(h)
+		local f = mkFrame(adScroll, UDim2.new(1,0,0,h), UDim2.new(0,0,0,0), Color3.fromRGB(14,8,21), 32, 8)
+		f.LayoutOrder = adLo adLo += 1
+		addStroke(f, Color3.fromRGB(50,24,75), 1)
+		return f
+	end
+
+	local function adInp(parent, ph, size, pos)
+		local tb = mkBox(parent, ph, size, pos, 34, 6)
+		tb.BackgroundColor3 = Color3.fromRGB(17,9,25)
+		tb.TextColor3 = Color3.fromRGB(192,176,212)
+		tb.TextSize = 12
+		addStroke(tb, Color3.fromRGB(60,28,88), 1)
+		return tb
+	end
+
+	local function adBt(parent, text, size, pos)
+		local b = mkBtn(parent, text, size, pos, Color3.fromRGB(34,15,52), Color3.fromRGB(182,145,218), 12, 34, 6)
+		addStroke(b, Color3.fromRGB(66,30,98), 1)
+		b.MouseEnter:Connect(function() TweenService:Create(b, TweenInfo.new(0.1), {BackgroundColor3=Color3.fromRGB(50,22,75)}):Play() end)
+		b.MouseLeave:Connect(function() TweenService:Create(b, TweenInfo.new(0.1), {BackgroundColor3=Color3.fromRGB(34,15,52)}):Play() end)
+		return b
+	end
+
+	adSec("adminSecKey")
+	local kRow = adRow(190)
+
+	local kKeyLbl = mkLabel(kRow, L.adminKeyLabel, UDim2.new(0,40,0,20), UDim2.new(0,10,0,8), 11, Color3.fromRGB(155,135,185), Enum.Font.Gotham, 33)
+	onLangChange(function() kKeyLbl.Text = L.adminKeyLabel end)
+	local keyInp = adInp(kRow, "LS-XXXX-XXXX", UDim2.new(0,185,0,28), UDim2.new(0,50,0,6))
+	local randB = adBt(kRow, L.adminRandom, UDim2.new(0,88,0,28), UDim2.new(0,240,0,6))
+	onLangChange(function() randB.Text = L.adminRandom end)
+	randB.MouseButton1Click:Connect(function()
+		local c = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+		local function rs(n) local s="" for i=1,n do s=s..c:sub(math.random(1,#c),math.random(1,#c)) end return s end
+		keyInp.Text = "LS-"..rs(4).."-"..rs(4)
+	end)
+
+	local durLbl = mkLabel(kRow, L.adminDuration, UDim2.new(0,45,0,20), UDim2.new(0,10,0,44), 11, Color3.fromRGB(155,135,185), Enum.Font.Gotham, 33)
+	onLangChange(function() durLbl.Text = L.adminDuration end)
+	local selDur = 0
+	local durBtnList = {}
+	local durOpts = {{"1S",1},{"1H",3600},{"1G",86400},{"1K",604800},{"1A",2592000},{"1Y",31536000},{"Sinir.",0}}
+	for i, opt in pairs(durOpts) do
+		local db = adBt(kRow, opt[1], UDim2.new(0,60,0,26), UDim2.new(0, 8+(i-1)*64, 0, 66))
+		db.TextSize = 11
+		local ov = opt[2]
+		db.MouseButton1Click:Connect(function()
+			selDur = ov
+			for _, b in pairs(durBtnList) do b.BackgroundColor3 = Color3.fromRGB(34,15,52) end
+			db.BackgroundColor3 = Color3.fromRGB(60,26,90)
+		end)
+		table.insert(durBtnList, db)
+	end
+
+	local usageLbl = mkLabel(kRow, L.adminUsage, UDim2.new(0,65,0,20), UDim2.new(0,10,0,102), 11, Color3.fromRGB(155,135,185), Enum.Font.Gotham, 33)
+	onLangChange(function() usageLbl.Text = L.adminUsage end)
+	local usageInp = adInp(kRow, L.adminUnlimited, UDim2.new(0,60,0,26), UDim2.new(0,76,0,100))
+	onLangChange(function() usageInp.PlaceholderText = L.adminUnlimited end)
+
+	local targetLbl = mkLabel(kRow, L.adminTarget, UDim2.new(0,148,0,20), UDim2.new(0,144,0,102), 11, Color3.fromRGB(155,135,185), Enum.Font.Gotham, 33)
+	onLangChange(function() targetLbl.Text = L.adminTarget end)
+	local targetInp = adInp(kRow, "isim veya ID", UDim2.new(0,175,0,26), UDim2.new(0,296,0,100))
+
+	local createKBtn = adBt(kRow, L.adminCreate, UDim2.new(0,500,0,30), UDim2.new(0,10,0,136))
+	createKBtn.TextSize = 13
+	onLangChange(function() createKBtn.Text = L.adminCreate end)
+	local kGenSt = mkLabel(kRow, "", UDim2.new(0,500,0,16), UDim2.new(0,10,0,170), 11, Color3.fromRGB(115,196,140), Enum.Font.Gotham, 33)
+
+	adSec("adminSecList")
+	local kListRow = adRow(160)
+
+	local kScroll = Instance.new("ScrollingFrame")
+	kScroll.Size = UDim2.new(1,-14,1,-6)
+	kScroll.Position = UDim2.new(0,7,0,3)
+	kScroll.BackgroundColor3 = Color3.fromRGB(12,6,18)
+	kScroll.BorderSizePixel = 0
+	kScroll.ScrollBarThickness = 3
+	kScroll.ScrollBarImageColor3 = Color3.fromRGB(76,38,110)
+	kScroll.CanvasSize = UDim2.new(0,0,0,0)
+	kScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	kScroll.ZIndex = 33
+	kScroll.Parent = kListRow
+	Instance.new("UICorner", kScroll).CornerRadius = UDim.new(0,6)
+	local ksL = Instance.new("UIListLayout")
+	ksL.Padding = UDim.new(0,3)
+	ksL.Parent = kScroll
+	local ksP = Instance.new("UIPadding")
+	ksP.PaddingTop = UDim.new(0,4)
+	ksP.PaddingLeft = UDim.new(0,5)
+	ksP.Parent = kScroll
+
+	local function refreshKeys()
+		for _, c in pairs(kScroll:GetChildren()) do
+			if c:IsA("Frame") then c:Destroy() end
+		end
+		for ks, kd in pairs(keyDatabase) do
+			local ke = mkFrame(kScroll, UDim2.new(1,-5,0,34), UDim2.new(0,0,0,0), Color3.fromRGB(16,8,24), 34, 6)
+			mkLabel(ke, ks, UDim2.new(0.34,0,1,0), UDim2.new(0,5,0,0), 10, Color3.fromRGB(180,145,215), Enum.Font.GothamBold, 35)
+			local tl = kd.expireTime and (math.max(0,kd.expireTime-os.time()).."s") or L.adminUnlimited
+			local ul = kd.uses and (kd.usedCount.."/"..kd.uses) or L.adminUnlimited
+			local st = kd.active and L.adminActive or L.adminDeactive
+			mkLabel(ke, st.." | "..tl.." | "..ul, UDim2.new(0.33,0,1,0), UDim2.new(0.34,0,0,0), 9, kd.active and Color3.fromRGB(115,196,140) or Color3.fromRGB(205,85,85), Enum.Font.Gotham, 35)
+			local ks2 = ks
+			local dactB = adBt(ke, kd.active and L.adminDeactBtn or L.adminActBtn, UDim2.new(0,58,0,22), UDim2.new(0.7,0,0.5,-11))
+			dactB.TextSize = 10
+			dactB.TextColor3 = kd.active and Color3.fromRGB(205,85,85) or Color3.fromRGB(115,196,140)
+			dactB.MouseButton1Click:Connect(function()
+				if keyDatabase[ks2] then keyDatabase[ks2].active = not keyDatabase[ks2].active refreshKeys() end
+			end)
+			local delB = adBt(ke, L.adminDelete, UDim2.new(0,36,0,22), UDim2.new(0.7,62,0.5,-11))
+			delB.TextSize = 10
+			delB.TextColor3 = Color3.fromRGB(210,75,75)
+			delB.MouseButton1Click:Connect(function() keyDatabase[ks2] = nil refreshKeys() end)
+		end
+	end
+
+	createKBtn.MouseButton1Click:Connect(function()
+		local ks = keyInp.Text
+		if ks == "" then kGenSt.Text=L.adminKeyEmpty kGenSt.TextColor3=Color3.fromRGB(205,85,85) return end
+		if keyDatabase[ks] then kGenSt.Text=L.adminKeyExists kGenSt.TextColor3=Color3.fromRGB(205,85,85) return end
+		local expT = selDur > 0 and (os.time()+selDur) or nil
+		local uses = tonumber(usageInp.Text) or nil
+		local target = targetInp.Text ~= "" and targetInp.Text or nil
+		keyDatabase[ks] = {active=true, expireTime=expT, uses=uses, usedCount=0, targetPlayer=target}
+		kGenSt.Text = L.adminCreated..ks
+		kGenSt.TextColor3 = Color3.fromRGB(115,196,140)
+		refreshKeys()
+		task.wait(3) kGenSt.Text = ""
+	end)
+
+	adSec("adminSecCustom")
+	local custRow = adRow(96)
+
+	local custNameLbl = mkLabel(custRow, L.adminPlayerName, UDim2.new(0,30,0,20), UDim2.new(0,10,0,8), 11, Color3.fromRGB(155,135,185), Enum.Font.Gotham, 33)
+	onLangChange(function() custNameLbl.Text = L.adminPlayerName end)
+	local custName = adInp(custRow, "Oyuncu adi", UDim2.new(0,165,0,28), UDim2.new(0,40,0,6))
+	local custIdLbl = mkLabel(custRow, L.adminPlayerID, UDim2.new(0,25,0,20), UDim2.new(0,212,0,8), 11, Color3.fromRGB(155,135,185), Enum.Font.Gotham, 33)
+	onLangChange(function() custIdLbl.Text = L.adminPlayerID end)
+	local custId = adInp(custRow, "UserID", UDim2.new(0,120,0,28), UDim2.new(0,237,0,6))
+
+	local custCreate = adBt(custRow, L.adminCustomCreate, UDim2.new(0,500,0,30), UDim2.new(0,10,0,46))
+	custCreate.TextSize = 13
+	onLangChange(function() custCreate.Text = L.adminCustomCreate end)
+	local custSt = mkLabel(custRow, "", UDim2.new(0,500,0,16), UDim2.new(0,10,0,78), 11, Color3.fromRGB(115,196,140), Enum.Font.Gotham, 33)
+
+	custCreate.MouseButton1Click:Connect(function()
+		local pN = custName.Text
+		local pI = custId.Text
+		if pN == "" and pI == "" then custSt.Text=L.adminNeedTarget custSt.TextColor3=Color3.fromRGB(205,85,85) return end
+		local target = pI ~= "" and (tonumber(pI) or pI) or pN
+		local base = (pN ~= "" and pN or pI):upper():gsub("[^%w]",""):sub(1,4)
+		local c = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+		local function rs(n) local s="" for i=1,n do s=s..c:sub(math.random(1,#c),math.random(1,#c)) end return s end
+		local nk = "LS-"..base.."-"..rs(4)
+		keyDatabase[nk] = {active=true, expireTime=nil, uses=1, usedCount=0, targetPlayer=target}
+		custSt.Text = "Key: "..nk.." -> "..tostring(target)
+		custSt.TextColor3 = Color3.fromRGB(115,196,140)
+		refreshKeys()
+		task.wait(5) custSt.Text = ""
+	end)
+
+	adSec("adminSecExtend")
+	local extRow = adRow(68)
+
+	local extKeyLbl = mkLabel(extRow, L.adminKeyLabel, UDim2.new(0,35,0,20), UDim2.new(0,10,0,8), 11, Color3.fromRGB(155,135,185), Enum.Font.Gotham, 33)
+	onLangChange(function() extKeyLbl.Text = L.adminKeyLabel end)
+	local extKey = adInp(extRow, L.adminExtendKey, UDim2.new(0,175,0,28), UDim2.new(0,46,0,6))
+	onLangChange(function() extKey.PlaceholderText = L.adminExtendKey end)
+	local extSecLbl = mkLabel(extRow, L.adminSeconds, UDim2.new(0,52,0,20), UDim2.new(0,228,0,8), 11, Color3.fromRGB(155,135,185), Enum.Font.Gotham, 33)
+	onLangChange(function() extSecLbl.Text = L.adminSeconds end)
+	local extAmt = adInp(extRow, "3600", UDim2.new(0,95,0,28), UDim2.new(0,280,0,6))
+	extAmt.Text = "3600"
+	local extAddB = adBt(extRow, L.adminExtend, UDim2.new(0,66,0,28), UDim2.new(0,10,0,42))
+	onLangChange(function() extAddB.Text = L.adminExtend end)
+	local extSetB = adBt(extRow, L.adminSet, UDim2.new(0,75,0,28), UDim2.new(0,80,0,42))
+	onLangChange(function() extSetB.Text = L.adminSet end)
+	local extSt = mkLabel(extRow, "", UDim2.new(0,280,0,16), UDim2.new(0,162,0,48), 11, Color3.fromRGB(115,196,140), Enum.Font.Gotham, 33)
+
+	extAddB.MouseButton1Click:Connect(function()
+		local k=extKey.Text local a=tonumber(extAmt.Text)
+		if not keyDatabase[k] then extSt.Text=L.adminNoKey return end
+		if not a then extSt.Text=L.adminInvalid return end
+		keyDatabase[k].expireTime = (keyDatabase[k].expireTime or os.time()) + a
+		extSt.Text = L.adminExtended refreshKeys()
+	end)
+	extSetB.MouseButton1Click:Connect(function()
+		local k=extKey.Text local a=tonumber(extAmt.Text)
+		if not keyDatabase[k] then extSt.Text=L.adminNoKey return end
+		if not a then extSt.Text=L.adminInvalid return end
+		keyDatabase[k].expireTime = os.time() + a
+		extSt.Text = L.adminSetDone refreshKeys()
+	end)
+
+	adSec("adminSecDisc")
+	local discRow = adRow(46)
+	mkLabel(discRow, "Discord:", UDim2.new(0,62,0,20), UDim2.new(0,10,0,10), 11, Color3.fromRGB(155,135,185), Enum.Font.Gotham, 33)
+	local discInp = adInp(discRow, "discord.gg/discord.gg/Wrh93AdDrM", UDim2.new(0,270,0,28), UDim2.new(0,74,0,6))
+	discInp.Text = discordLink
+	local discSave = adBt(discRow, L.adminDiscSave, UDim2.new(0,115,0,28), UDim2.new(0,350,0,6))
+	onLangChange(function() discSave.Text = L.adminDiscSave end)
+	discSave.MouseButton1Click:Connect(function()
+		discordLink = discInp.Text
+		getKeyBtn.Text = L.keyGet..discordLink
+	end)
+
+	adSec("adminSecPlayers")
+	local plRow = adRow(145)
+	local refPlBtn = adBt(plRow, L.adminRefresh, UDim2.new(0,100,0,26), UDim2.new(0,10,0,6))
+	onLangChange(function() refPlBtn.Text = L.adminRefresh end)
+	local plScroll = Instance.new("ScrollingFrame")
+	plScroll.Size = UDim2.new(1,-14,0,108)
+	plScroll.Position = UDim2.new(0,7,0,36)
+	plScroll.BackgroundColor3 = Color3.fromRGB(12,6,18)
+	plScroll.BorderSizePixel = 0
+	plScroll.ScrollBarThickness = 3
+	plScroll.ScrollBarImageColor3 = Color3.fromRGB(76,38,110)
+	plScroll.CanvasSize = UDim2.new(0,0,0,0)
+	plScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	plScroll.ZIndex = 33
+	plScroll.Parent = plRow
+	Instance.new("UICorner", plScroll).CornerRadius = UDim.new(0,6)
+	local plL = Instance.new("UIListLayout")
+	plL.Padding = UDim.new(0,3)
+	plL.Parent = plScroll
+
+	local function refPlayers()
+		for _, c in pairs(plScroll:GetChildren()) do
+			if c:IsA("TextLabel") then c:Destroy() end
+		end
+		for _, p2 in pairs(Players:GetPlayers()) do
+			mkLabel(plScroll, p2.Name.." | ID: "..p2.UserId, UDim2.new(1,-8,0,22), UDim2.new(0,0,0,0), 11, Color3.fromRGB(165,145,195), Enum.Font.Gotham, 34)
+		end
+	end
+	refPlBtn.MouseButton1Click:Connect(refPlayers)
+	refPlayers()
+
+	local function toggleAdmin()
+		adminOpen = not adminOpen
+		if adminOpen then
+			adminFrame2.Position = UDim2.new(0.5,-265,0.5,-325)
+			adminFrame2.Visible = true
+			adminFrame2.Size = UDim2.new(0,510,0,0)
+			TweenService:Create(adminFrame2, TweenInfo.new(0.26, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size=UDim2.new(0,530,0,650)}):Play()
+			refreshKeys()
+		else
+			TweenService:Create(adminFrame2, TweenInfo.new(0.18, Enum.EasingStyle.Quint), {Size=UDim2.new(0,510,0,0)}):Play()
+			task.wait(0.2)
+			adminFrame2.Visible = false
+		end
+	end
+
+	adClose.MouseButton1Click:Connect(toggleAdmin)
+	UserInputService.InputBegan:Connect(function(inp, gp)
+		if gp then return end
+		if inp.KeyCode == Enum.KeyCode.RightAlt then toggleAdmin() end
+	end)
+
+	local adTogBtn = mkBtn(SG, "ADMIN", UDim2.new(0,60,0,26), UDim2.new(0,10,1,-40), Color3.fromRGB(18,8,28), Color3.fromRGB(170,125,208), 10, 5, 7)
+	addStroke(adTogBtn, Color3.fromRGB(74,35,110), 1.2)
+	adTogBtn.MouseButton1Click:Connect(toggleAdmin)
+
+	print("[Leastra] Admin panel hazir. Acmak: Sag Alt veya ADMIN butonu")
+end
+
+print("[Leastra] Tum sistem yuklendi. Ana UI: Sag CTRL")
